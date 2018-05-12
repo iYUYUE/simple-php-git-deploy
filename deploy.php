@@ -8,6 +8,14 @@
  * @link    https://github.com/markomarkovic/simple-php-git-deploy/
  */
 
+// Import PHPMailer classes into the global namespace
+// These must be at the top of your script, not inside a function
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+//Load composer's autoloader
+require 'vendor/autoload.php';
+
 // =========================================[ Configuration start ]===
 
 /**
@@ -17,11 +25,11 @@
  * configuration options there instead of here. That way, you won't have to edit
  * the configuration again if you download the new version of `deploy.php`.
  */
-if (file_exists(basename(__FILE__, '.php').'-config.php')) {
-	define('CONFIG_FILE', basename(__FILE__, '.php').'-config.php');
-	require_once CONFIG_FILE;
+if (!isset($_GET['project']) || $_GET['project'] === '' || !file_exists($_GET['project'].'-config.php')) {
+	header($_SERVER['SERVER_PROTOCOL'] . ' 403 Forbidden', true, 403);
 } else {
-	define('CONFIG_FILE', __FILE__);
+	define('CONFIG_FILE', $_GET['project'].'-config.php');
+	require_once CONFIG_FILE;
 }
 
 /**
@@ -385,10 +393,42 @@ Cleaning up temporary files ...
 		error_log($error);
 		if (EMAIL_ON_ERROR) {
 			$output .= ob_get_contents();
-			$headers = array();
-			$headers[] = sprintf('From: Simple PHP Git deploy script <simple-php-git-deploy@%s>', $_SERVER['HTTP_HOST']);
-			$headers[] = sprintf('X-Mailer: PHP/%s', phpversion());
-			mail(EMAIL_ON_ERROR, $error, strip_tags(trim($output)), implode("\r\n", $headers));
+			$mail = new PHPMailer(true);                              // Passing `true` enables exceptions
+			try {
+			    //Server settings
+			    // $mail->SMTPDebug = 2;                                 // Enable verbose debug output
+			    $mail->isSMTP();                                      // Set mailer to use SMTP
+			    $mail->Host = 'smtp.mailgun.org';  // Specify main and backup SMTP servers
+			    $mail->SMTPAuth = true;                               // Enable SMTP authentication
+			    $mail->Username = 'deploy@sms.iyuyue.net';                 // SMTP username
+			    $mail->Password = 'G9WuBCfTRiCUYB)qbL';                           // SMTP password
+			    $mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
+			    $mail->Port = 587;                                    // TCP port to connect to
+
+			    //Recipients
+			    $mail->setFrom('deploy@sms.iyuyue.net', 'Deployer');
+			    $mail->addAddress(EMAIL_ON_ERROR);     // Add a recipient
+			    // $mail->addAddress('ellen@example.com');               // Name is optional
+			    // $mail->addReplyTo('info@example.com', 'Information');
+			    // $mail->addCC('cc@example.com');
+			    // $mail->addBCC('bcc@example.com');
+
+			    //Attachments
+			    // $mail->addAttachment('/var/tmp/file.tar.gz');         // Add attachments
+			    // $mail->addAttachment('/tmp/image.jpg', 'new.jpg');    // Optional name
+
+			    //Content
+			    $mail->isHTML(true);                                  // Set email format to HTML
+			    $mail->Subject = $error;
+			    $mail->Body    = strip_tags(trim($output));
+			    // $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
+
+			    $mail->send();
+			    echo 'Message has been sent';
+			} catch (Exception $e) {
+			    echo 'Message could not be sent.';
+			    echo 'Mailer Error: ' . $mail->ErrorInfo;
+			}
 		}
 		break;
 	}
