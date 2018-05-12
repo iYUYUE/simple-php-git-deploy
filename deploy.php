@@ -420,8 +420,8 @@ Cleaning up temporary files ...
 			    //Content
 			    $mail->isHTML(true);                                  // Set email format to HTML
 			    $mail->Subject = $error;
-			    $mail->Body    = strip_tags(trim($output)).sprintf('<hr>X-Mailer: PHP/%s', phpversion());
-			    // $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
+			    $mail->Body    = trim($output).sprintf('<hr>X-Mailer: PHP/%s</pre></body></html>', phpversion());
+			    // $mail->AltBody = strip_tags(trim($output));
 
 			    $mail->send();
 			    echo 'Message has been sent';
