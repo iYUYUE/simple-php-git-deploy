@@ -332,18 +332,18 @@ $commands[] = sprintf(
 
 // =======================================[ Post-Deployment steps ]===
 
-// Remove the TMP_DIR (depends on CLEAN_UP)
-if (CLEAN_UP) {
-	$commands['cleanup'] = sprintf(
-		'rm -rf %s'
-		, TMP_DIR
-	);
-}
-
 // Cleanup composer
 if (defined('USE_COMPOSER') && USE_COMPOSER === true) {
 	$commands['cleanup'] = sprintf(
 		'rm -rf %scomposer.lock'
+		, TMP_DIR
+	);
+}
+
+// Remove the TMP_DIR (depends on CLEAN_UP)
+if (CLEAN_UP) {
+	$commands['cleanup'] = sprintf(
+		'rm -rf %s'
 		, TMP_DIR
 	);
 }
