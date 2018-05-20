@@ -76,6 +76,7 @@ For more info, read the source of `deploy.php`.
    `deploy_develop.php` and configure them separately. In that case, the
    configuration files need to be named `deploy_master-config.php` and
    `deploy_develop-config.php` respectively.
+ * Host key verification failed? Try this `sudo -u www-data ssh -T git@github.com`
 
 ---
 

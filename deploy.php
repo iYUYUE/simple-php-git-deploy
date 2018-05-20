@@ -340,6 +340,14 @@ if (CLEAN_UP) {
 	);
 }
 
+// Cleanup composer
+if (defined('USE_COMPOSER') && USE_COMPOSER === true) {
+	$commands['cleanup'] = sprintf(
+		'rm -rf %scomposer.lock'
+		, TMP_DIR
+	);
+}
+
 // =======================================[ Run the command steps ]===
 $output = '';
 foreach ($commands as $command) {
